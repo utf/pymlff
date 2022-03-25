@@ -1,5 +1,7 @@
 """Core Configuration and MLAB objects."""
 
+from __future__ import annotations
+
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass
