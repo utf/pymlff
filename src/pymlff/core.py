@@ -107,9 +107,7 @@ class MLAB:
     @property
     def atom_types(self) -> list[str]:
         """Sorted list of all atom types across all configurations."""
-        return list(
-            sorted(set([el for c in self.configurations for el in c.atom_types]))
-        )
+        return list(sorted({el for c in self.configurations for el in c.atom_types}))
 
     @property
     def num_configurations(self) -> int:
@@ -119,17 +117,17 @@ class MLAB:
     @property
     def max_num_atom_types(self) -> int:
         """Maximum number of atom types across all configurations."""
-        return max([c.num_atom_types for c in self.configurations])
+        return max(c.num_atom_types for c in self.configurations)
 
     @property
     def max_num_atoms(self) -> int:
         """Maximum number of total atoms across all configurations."""
-        return max([c.num_atoms for c in self.configurations])
+        return max(c.num_atoms for c in self.configurations)
 
     @property
     def max_num_atoms_per_type(self) -> int:
         """Maximum number of atoms (for one type) across all configurations."""
-        return max([max(c.atom_types_numbers.values()) for c in self.configurations])
+        return max(max(c.atom_types_numbers.values()) for c in self.configurations)
 
     @property
     def num_basis_set_per_type(self) -> list[int]:
@@ -198,7 +196,7 @@ class MLAB:
                 config_mapping[i + 1] = len(new_configurations)
 
         new_atom_types = list(
-            sorted(set([el for c in new_configurations for el in c.atom_types]))
+            sorted({el for c in new_configurations for el in c.atom_types})
         )
 
         new_basis_set = {}
