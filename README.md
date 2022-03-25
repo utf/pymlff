@@ -38,7 +38,7 @@ the configuration will be removed. For example, to filter configurations with le
 new_ab = ab.filter_configurations(lambda i, config: config.num_atoms >= 256)
 ```
 
-See the `Configuration` object for the available attributes to use for filtering.
+See the [Configuration](https://github.com/utf/pymlff/blob/97f972f9f955c145fb43c2cc74c71fabeac523fb/src/pymlff/core.py#L11) object for the available attributes to use for filtering.
 
 ### Combining ML_AB files
 
