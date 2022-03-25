@@ -256,8 +256,12 @@ class MLAB:
 
         # reconstruct new basis set (i.e., update configuration idx of new samples)
         last_idx = len(self.configurations)
-        for (config_idx, atom_idx) in ml_ab2.basis_set:
-            new_basis_set.append((config_idx + last_idx, atom_idx))
+        for el, el_basis in ml_ab2.basis_set.items():
+            if el not in new_basis_set:
+                new_basis_set[el] = []
+
+            for (config_idx, atom_idx) in el_basis:
+                new_basis_set[el].append((config_idx + last_idx, atom_idx))
 
         return MLAB(
             configurations=new_configurations,
