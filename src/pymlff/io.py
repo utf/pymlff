@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 from itertools import chain
 
 import numpy as np
@@ -158,9 +159,15 @@ def ml_ab_to_string(ml_ab):
     str
         The string representation of an MLAB object.
     """
-    ref_energy_fmt = "  ".join(map("{:.14f} ".format, ml_ab.reference_energy_per_type))
-    atomic_mass_fmt = "  ".join(map("{:.14f} ".format, ml_ab.atomic_mass_per_type))
-    basis_number_fmt = "  ".join(map(str, ml_ab.num_basis_set_per_type))
+    ref_energy_fmt = _three_fmt(
+        map("{:.14f} ".format, ml_ab.reference_energy_per_type), prefix="   "
+    )
+    atomic_mass_fmt = _three_fmt(
+        map("{:.14f} ".format, ml_ab.atomic_mass_per_type), prefix="   "
+    )
+    basis_number_fmt = _three_fmt(
+        map(str, ml_ab.num_basis_set_per_type), prefix="       "
+    )
     basis_fmt = "\n".join(
         [
             _BASIS_FMT_STR.format(
@@ -195,7 +202,7 @@ def ml_ab_to_string(ml_ab):
         ml_ab.version,
         ml_ab.num_configurations,
         ml_ab.max_num_atom_types,
-        " ".join(ml_ab.atom_types),
+        _three_fmt(ml_ab.atom_types, prefix="     "),
         ml_ab.max_num_atoms,
         ml_ab.max_num_atoms_per_type,
         ref_energy_fmt,
@@ -248,16 +255,25 @@ def _parse_config(config):
 
 def _parse_header(header):
     version = header[0]
-    atom_types = header[12].split()
-    reference_energy = list(map(float, header[24].split()))
-    atomic_mass = list(map(float, header[28].split()))
-    num_basis = list(map(int, header[32].split()))
+    natom_types = int(header[8])
+    nlines = int(np.ceil(natom_types / 3))
+    atom_types = " ".join(header[12 : 12 + nlines]).split()
+    reference_energy = list(
+        map(float, " ".join(header[23 + nlines : 23 + nlines * 2]).split())
+    )
+    atomic_mass = list(
+        map(float, " ".join(header[26 + nlines * 2 : 26 + nlines * 3]).split())
+    )
+    num_basis = list(
+        map(int, " ".join(header[29 + nlines * 3 : 29 + nlines * 4]).split())
+    )
     basis_set = {}
 
     for i, nbasis in enumerate(num_basis):
         c = sum(num_basis[:i]) + 3 * i
         basis_set[atom_types[i]] = [
-            list(map(int, x.split())) for x in header[36 + c : 36 + nbasis + c]
+            list(map(int, x.split()))
+            for x in header[32 + nlines * 4 + c : 32 + nlines * 4 + nbasis + c]
         ]
 
     return {
@@ -268,3 +284,19 @@ def _parse_header(header):
         "num_basis": num_basis,
         "basis_set": basis_set,
     }
+
+
+def _grouper(iterable, n):
+    """
+    Collect data into fixed-length chunks or blocks.
+
+    >>> list(grouper('ABCDEFG', 3))
+    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+    """
+    iterable = iter(iterable)
+    return iter(lambda: list(itertools.islice(iterable, n)), [])
+
+
+def _three_fmt(obj, prefix=""):
+    """Format a list as three items per line."""
+    return f"\n{prefix}".join([" ".join(x) for x in _grouper(obj, 3)])
