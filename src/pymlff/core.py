@@ -122,6 +122,11 @@ class MLAB:
         return max(c.num_atom_types for c in self.configurations)
 
     @property
+    def num_atom_types(self) -> int:
+        """Maximum number of atom types across all configurations."""
+        return len(self.atom_types)
+
+    @property
     def max_num_atoms(self) -> int:
         """Maximum number of total atoms across all configurations."""
         return max(c.num_atoms for c in self.configurations)

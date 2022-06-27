@@ -201,7 +201,7 @@ def ml_ab_to_string(ml_ab):
     return _ML_AB_FMT_STR.format(
         ml_ab.version,
         ml_ab.num_configurations,
-        ml_ab.max_num_atom_types,
+        ml_ab.num_atom_types,
         _three_fmt(ml_ab.atom_types, prefix="     "),
         ml_ab.max_num_atoms,
         ml_ab.max_num_atoms_per_type,
