@@ -20,9 +20,10 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     package_data={"pymlff": ["py.typed"]},
+    entry_points={"console_scripts": ["mlff = pymlff.cli:cli"]},
     zip_safe=False,
     include_package_data=True,
-    install_requires=["numpy"],
+    install_requires=["numpy", "click"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",

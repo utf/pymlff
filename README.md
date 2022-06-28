@@ -10,11 +10,29 @@ Clone the repository and install using
 pip install .
 ```
 
-The only dependency is numpy.
+Pymlff depends on numpy and click.
 
 ## Examples
 
-### Reading and writing ML_AB files
+### Command line utility
+
+Pymlff includes a basic command line utility for merging ML_AB.
+
+```bash
+mlff merge ML_AB1 ML_AB2 ML_AB_NEW
+```
+
+More than 2 ML_AB files can be combined at once, e.g.
+
+```bash
+mlff merge ML_AB1 ML_AB2 ML_AB3 ML_AB4 ML_AB_NEW
+```
+
+### Python API
+
+More functionality is available through the Python API.
+
+#### Reading and writing ML_AB files
 
 ```python
 from pymlff import MLAB
@@ -26,7 +44,7 @@ ab = MLAB.from_file("ML_AB")
 ab.write_file("ML_AB_NEW")
 ```
 
-### Filtering configurations
+#### Filtering configurations
 
 Configurations can be filtered based on a filter function. The function should accept two
 arguments, the index of the configuration in the configurations list and a configuration
@@ -40,7 +58,7 @@ new_ab = ab.filter_configurations(lambda i, config: config.num_atoms >= 256)
 
 See the [Configuration](https://github.com/utf/pymlff/blob/97f972f9f955c145fb43c2cc74c71fabeac523fb/src/pymlff/core.py#L11) object for the available attributes to use for filtering.
 
-### Combining ML_AB files
+#### Combining ML_AB files
 
 MLAB objects can be combined using the Python `+` operator. For example,
 
