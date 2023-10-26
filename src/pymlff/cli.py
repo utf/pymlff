@@ -33,3 +33,19 @@ def merge(inputs, output):
             sys.exit()
 
     new_ml_ab.write_file(output)
+
+
+@cli.command()
+@click.argument("input", type=click.Path(exists=True))
+@click.argument("output", type=click.Path(exists=False))
+def write_extxyz(input, output):
+    """Convert an ML_AB file to extended xyz format."""
+    from pymlff import MLAB
+
+    try:
+        ml_ab = MLAB.from_file(input)
+    except ValueError:
+        click.echo(f"ERROR: Could not read ML_AB file: {input}")
+        sys.exit()
+
+    ml_ab.write_extxyz(output)

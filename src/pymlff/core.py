@@ -293,3 +293,16 @@ class MLAB:
         """
         with open(filename, "w") as f:
             f.write(self.to_string())
+
+    def write_extxyz(self, filename):
+        """
+        Write MLAB object to an extended xyz file.
+
+        Parameters
+        ----------
+        filename
+            A filename.
+        """
+        from pymlff.io import ml_ab_to_extxyz
+
+        ml_ab_to_extxyz(self, filename)

@@ -98,6 +98,8 @@ _ML_AB_FMT_STR = """ {}
 {}
 {}
 """
+_INIT_STR_EXTYXZ = """energy={} stress="{}" Lattice="{}" pbc="T T T" Properties=species:S:1:pos:R:3:forces:R:3"""
+_KBAR_TO_EV_Acub = 6.242e-4  # Convert VASP kbar stress to eV/A^3
 
 
 def read_ml_ab_file(filename):
@@ -220,20 +222,20 @@ def _parse_config(config):
     natom_types = int(config[7])
     natoms = int(config[11])
     atom_types_numbers = {
-        x.split()[0]: int(x.split()[1]) for x in config[15 : 15 + natom_types]
+        x.split()[0]: int(x.split()[1]) for x in config[15: 15 + natom_types]
     }
     ctifor = float(config[18 + natom_types])
     lattice = [
-        list(map(float, x.split())) for x in config[22 + natom_types : 25 + natom_types]
+        list(map(float, x.split())) for x in config[22 + natom_types: 25 + natom_types]
     ]
     coords = [
         list(map(float, x.split()))
-        for x in config[28 + natom_types : 28 + natom_types + natoms]
+        for x in config[28 + natom_types: 28 + natom_types + natoms]
     ]
     total_energy = float(config[31 + natom_types + natoms])
     forces = [
         list(map(float, x.split()))
-        for x in config[35 + natom_types + natoms : 35 + natom_types + natoms * 2]
+        for x in config[35 + natom_types + natoms: 35 + natom_types + natoms * 2]
     ]
     stress_diagonal = list(map(float, config[40 + natom_types + natoms * 2].split()))
     stress_off_diagonal = list(
@@ -257,15 +259,15 @@ def _parse_header(header):
     version = header[0]
     natom_types = int(header[8])
     nlines = int(np.ceil(natom_types / 3))
-    atom_types = " ".join(header[12 : 12 + nlines]).split()
+    atom_types = " ".join(header[12: 12 + nlines]).split()
     reference_energy = list(
-        map(float, " ".join(header[23 + nlines : 23 + nlines * 2]).split())
+        map(float, " ".join(header[23 + nlines: 23 + nlines * 2]).split())
     )
     atomic_mass = list(
-        map(float, " ".join(header[26 + nlines * 2 : 26 + nlines * 3]).split())
+        map(float, " ".join(header[26 + nlines * 2: 26 + nlines * 3]).split())
     )
     num_basis = list(
-        map(int, " ".join(header[29 + nlines * 3 : 29 + nlines * 4]).split())
+        map(int, " ".join(header[29 + nlines * 3: 29 + nlines * 4]).split())
     )
     basis_set = {}
 
@@ -273,7 +275,7 @@ def _parse_header(header):
         c = sum(num_basis[:i]) + 3 * i
         basis_set[atom_types[i]] = [
             list(map(int, x.split()))
-            for x in header[32 + nlines * 4 + c : 32 + nlines * 4 + nbasis + c]
+            for x in header[32 + nlines * 4 + c: 32 + nlines * 4 + nbasis + c]
         ]
 
     return {
@@ -300,3 +302,41 @@ def _grouper(iterable, n):
 def _three_fmt(obj, prefix=""):
     """Format a list as three items per line."""
     return f"\n{prefix}".join([" ".join(x) for x in _grouper(obj, 3)])
+
+
+def ml_ab_to_extxyz(ml_ab, filename, stress_unit='ev/A^3'):
+    """
+    Convert an MLAB object to an extended XYZ string representation.
+    Parameters
+    ----------
+    ml_ab
+        An MLAB object.
+    filename
+        Path to an extended XYZ file.
+    stress_unit
+        Unit of stress. VASP units are kbar. Default is 'ev/A^3'.
+        If 'ev/A^3', the stress is converted from kbar to eV/A^3.
+    """
+    if stress_unit == 'kbar':
+        stress_unit = 1
+    elif stress_unit == 'ev/A^3':
+        stress_unit = _KBAR_TO_EV_Acub
+    with open(filename, 'w') as f:
+        for i, conf in enumerate(ml_ab.configurations):
+            stress = stress_unit * np.array(
+                [-conf.stress_diagonal[0], -conf.stress_off_diagonal[0], -conf.stress_off_diagonal[2],
+                 -conf.stress_off_diagonal[0], -conf.stress_diagonal[1], -conf.stress_off_diagonal[1],
+                 -conf.stress_off_diagonal[2], -conf.stress_off_diagonal[1], -conf.stress_diagonal[2]])
+            f.write(str(conf.num_atoms) + "\n")
+
+            f.write(_INIT_STR_EXTYXZ.format(conf.total_energy,
+                                            ' '.join(map("{:.16f}".format, stress)),
+                                            ' '.join(map("{:.16f}".format, conf.lattice.flatten()))) + "\n")
+            c = 0
+            for el, num in conf.atom_types_numbers.items():
+                for j in range(num):
+                    f.write(el + "         ")
+                    f.write(" ".join(map("{:.16f}".format, conf.coords[c, :])) + " ")
+                    f.write(" ".join(map("{:.16f}".format, conf.forces[c, :])) + "\n")
+                    c += 1
+        f.close()
