@@ -28,6 +28,12 @@ More than 2 ML_AB files can be combined at once, e.g.
 mlff merge ML_AB1 ML_AB2 ML_AB3 ML_AB4 ML_AB_NEW
 ```
 
+Pymlff also includes a command line utility for converting ML_AB files to extended xyz (extxyz) files.
+
+```bash
+mlff write-extxyz ML_AB ML_AB.xyz
+```
+
 ### Python API
 
 More functionality is available through the Python API.
@@ -70,4 +76,18 @@ ab1 = MLAB.from_file("ML_AB1")
 ab2 = MLAB.from_file("ML_AB2")
 
 new_ab = ab1 + ab2
+```
+
+#### Writing to extxyz
+
+MLAB objects can be written to the extxyz format using the `write_extxyz` method.
+
+```python
+from pymlff import MLAB
+
+# load an ML_AB file
+ab = MLAB.from_file("ML_AB")
+
+# write an extxyz file
+ab.write_extxyz("ML_AB.xyz")
 ```
