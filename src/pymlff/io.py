@@ -304,7 +304,7 @@ def _three_fmt(obj, prefix=""):
     return f"\n{prefix}".join([" ".join(x) for x in _grouper(obj, 3)])
 
 
-def ml_ab_to_extxyz(ml_ab, filename, stress_unit='ev/A^3'):
+def ml_ab_to_extxyz(ml_ab, filename, stress_unit='eV/A^3'):
     """
     Convert an MLAB object to an extended XYZ string representation.
     Parameters
@@ -314,12 +314,12 @@ def ml_ab_to_extxyz(ml_ab, filename, stress_unit='ev/A^3'):
     filename
         Path to an extended XYZ file.
     stress_unit
-        Unit of stress. VASP units are kbar. Default is 'ev/A^3'.
+        Unit of stress to convert to. VASP units are kbar. Default is 'ev/A^3'.
         If 'ev/A^3', the stress is converted from kbar to eV/A^3.
     """
     if stress_unit == 'kbar':
         stress_unit = 1
-    elif stress_unit == 'ev/A^3':
+    elif stress_unit == 'eV/A^3':
         stress_unit = _KBAR_TO_EV_Acub
     with open(filename, 'w') as f:
         for i, conf in enumerate(ml_ab.configurations):
