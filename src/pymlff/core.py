@@ -294,7 +294,7 @@ class MLAB:
         with open(filename, "w") as f:
             f.write(self.to_string())
 
-    def write_extxyz(self, filename):
+    def write_extxyz(self, filename, stress_unit):
         """
         Write MLAB object to an extended xyz file.
 
@@ -302,7 +302,10 @@ class MLAB:
         ----------
         filename
             A filename.
+        stress_unit
+            Unit of stress to convert to. VASP units are kbar. Default is 'ev/A^3'.
+            If 'ev/A^3', the stress is converted from kbar to eV/A^3.
         """
         from pymlff.io import ml_ab_to_extxyz
 
-        ml_ab_to_extxyz(self, filename)
+        ml_ab_to_extxyz(self, filename, stress_unit)
