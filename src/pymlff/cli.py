@@ -38,8 +38,14 @@ def merge(inputs, output):
 @cli.command()
 @click.argument("input", type=click.Path(exists=True))
 @click.argument("output", type=click.Path(exists=False))
-def write_extxyz(input, output):
-    """Convert an ML_AB file to extended xyz format."""
+@click.argument("stress_unit", type=click.Choice(["kbar", "eV/A^3"]))
+def write_extxyz(input, output, stress_unit):
+    """Convert an ML_AB file to extended xyz format.
+
+    STRESS_UNIT is the unit that the stress tensor is converted to.
+    It can be either 'kbar' or 'eV/A^3'.
+    We assume the stress tensor is in kbar in the ML_AB file.
+    """
     from pymlff import MLAB
 
     try:
@@ -48,4 +54,4 @@ def write_extxyz(input, output):
         click.echo(f"ERROR: Could not read ML_AB file: {input}")
         sys.exit()
 
-    ml_ab.write_extxyz(output)
+    ml_ab.write_extxyz(output, stress_unit=stress_unit)
