@@ -265,7 +265,7 @@ class MLAB:
             if el not in new_basis_set:
                 new_basis_set[el] = []
 
-            for (config_idx, atom_idx) in el_basis:
+            for config_idx, atom_idx in el_basis:
                 new_basis_set[el].append((config_idx + last_idx, atom_idx))
 
         return MLAB(
@@ -294,7 +294,7 @@ class MLAB:
         with open(filename, "w") as f:
             f.write(self.to_string())
 
-    def write_extxyz(self, filename, stress_unit):
+    def write_extxyz(self, filename, stress_unit=None):
         """
         Write MLAB object to an extended xyz file.
 
@@ -303,8 +303,9 @@ class MLAB:
         filename
             A filename.
         stress_unit
-            Unit of stress to convert to. VASP units are kbar. Default is 'ev/A^3'.
-            If 'ev/A^3', the stress is converted from kbar to eV/A^3.
+            Unit of stress to convert to. VASP units are kbar. Default is None which leaves the units alone.
+            If 'ev/A^3', the stress is converted from kbar to eV/A^3 (with a negative sign convention assumed).
+
         """
         from pymlff.io import ml_ab_to_extxyz
 

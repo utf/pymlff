@@ -38,9 +38,10 @@ def merge(inputs, output):
 @cli.command()
 @click.argument("input", type=click.Path(exists=True))
 @click.argument("output", type=click.Path(exists=False))
-@click.argument("stress_unit", type=click.Choice(["kbar", "eV/A^3"]))
+@click.option("--stress_unit", default=None, required=False)
 def write_extxyz(input, output, stress_unit):
     """Convert an ML_AB file to extended xyz format.
+
 
     STRESS_UNIT is the unit that the stress tensor is converted to.
     It can be either 'kbar' or 'eV/A^3'.
