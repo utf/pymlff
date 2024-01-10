@@ -38,7 +38,7 @@ def merge(inputs, output):
 @cli.command()
 @click.argument("input", type=click.Path(exists=True))
 @click.argument("output", type=click.Path(exists=False))
-@click.option("--stress_unit", default=None, required=False)
+@click.option("--stress-unit", default=None, required=False)
 def write_extxyz(input, output, stress_unit):
     """Convert an ML_AB file to extended xyz format.
 
