@@ -28,10 +28,14 @@ More than 2 ML_AB files can be combined at once, e.g.
 mlff merge ML_AB1 ML_AB2 ML_AB3 ML_AB4 ML_AB_NEW
 ```
 
-Pymlff also includes a command line utility for converting ML_AB files to extended xyz (extxyz) files.
+Pymlff also includes a command line utility for converting ML_AB files to extended xyz (extxyz) files. The last argument is the units to use for converting the VASP kbar units. Valid units are eV/A^3 and kbar.
 
 ```bash
+# Convert ML_AB to extxyz
 mlff write-extxyz ML_AB ML_AB.xyz
+
+# Convert ML_AB to extxyz and convert the units of stress from kbar to eV/A^3 (applies a negative sign)
+mlff write-extxyz ML_AB ML_AB.xyz --stress-unit=eV/A^3
 ```
 
 ### Python API
@@ -89,5 +93,5 @@ from pymlff import MLAB
 ab = MLAB.from_file("ML_AB")
 
 # write an extxyz file
-ab.write_extxyz("ML_AB.xyz")
+ab.write_extxyz("ML_AB.xyz", "eV/A^3")
 ```
