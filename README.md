@@ -35,7 +35,7 @@ Pymlff also includes a command line utility for converting ML_AB files to extend
 mlff write-extxyz ML_AB ML_AB.xyz
 
 # Convert ML_AB to extxyz and convert the units of stress from kbar to eV/A^3 (applies a negative sign)
-mlff write-extxyz ML_AB ML_AB.xyz --stress_units=eV/A^3
+mlff write-extxyz ML_AB ML_AB.xyz --stress-unit=eV/A^3
 ```
 
 ### Python API
