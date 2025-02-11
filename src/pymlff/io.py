@@ -410,12 +410,12 @@ def ml_ab_from_trajectory(
     trajectory: list[Atoms]
         List of ASE Atoms objects.
     basis_set: dict
-        The basis set for the trained force field. Is formatted as a dictionary mapping
+        The basis set for the trained force field. It is formatted as a dictionary mapping
         the elemental species to the basis set. The basis set is specified as a list of
-        [configuration_index, atom_index], that gives which atoms are included in the
-        training for the model. Note that the configuration and atom index are 1-indexed
-        as required by VASP. If not set, will default to [(1,1),] for each element, and
-        should be combined with ML_ISTART=3, as explained here:
+        [configuration_index, atom_index], that specifies which atomic environments are
+        included in the training set for each species. Note that the configuration and
+        atom index are 1-indexed as required by VASP. If not set, will default to [(1,1),]
+        for each element, and should be combined with `ML_ISTART=3`, as explained here:
         https://www.vasp.at/forum/viewtopic.php?t=18400
     version: str
         The version of the ML_AB file format. Defaults to ' 1.0 Version'.
