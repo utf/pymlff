@@ -33,7 +33,7 @@ class Configuration:
     stress_diagonal : array
         The diagonal part of the stress tensor (xx, yy, zz).
     stress_off_diagonal : array
-        The off diagonal part of the stress tensor (xz, yz, zx).
+        The off diagonal part of the stress tensor (xy, yz, zx).
     """
 
     name: str

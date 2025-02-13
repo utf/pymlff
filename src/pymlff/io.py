@@ -1,11 +1,17 @@
 """Input and output functions."""
-
 from __future__ import annotations
+
+from pymlff.core import Configuration, MLAB
+
+from collections import Counter, OrderedDict
 
 import itertools
 from itertools import chain
 
 import numpy as np
+
+from ase.data import atomic_masses, atomic_numbers
+from ase.atoms import Atoms
 
 _LATTICE_FMT_STR = (
     "{:.16f}  {:.16f}  {:.16f}\n{:.16f}  {:.16f}  {:.16f}\n{:.16f}  {:.16f}  {:.16f}"
@@ -356,3 +362,82 @@ def ml_ab_to_extxyz(ml_ab, filename, stress_unit=None):
                     f.write(" ".join(map("{:.16f}".format, conf.forces[c, :])) + "\n")
                     c += 1
         f.close()
+
+
+def config_from_atoms(a) -> Configuration:
+    """
+    Transforms an ASE Atoms object into a Configuration object.
+
+    Parameters
+    ----------
+    a (ase.atoms.Atoms)
+        ASE Atoms object
+
+    Returns
+    -------
+    Configuration
+        Configuration object
+    """
+    _EV_Acub_TO_KBAR = -1 / _KBAR_TO_EV_Acub # From eV/A^3 to kbar. Assumes negative sign convention in VASP
+    xx, yy, zz, yz, xz, xy = a.get_stress(voigt=True)
+    config = Configuration(
+        name=a.get_chemical_formula(),
+        atom_types_numbers=dict(Counter(a.get_chemical_symbols())), # eg {'Cd': 32, 'Te': 32}
+        ctifor=0.001, # Needs to be set for writting MLAB with pymlff, so spurious value.
+        # If desired to overwrite, can set ISTART=3 and CTIFOR=0.01 in INCAR.
+        # (see https://www.vasp.at/forum/viewtopic.php?t=18400.
+        lattice=a.get_cell().array,
+        coords=a.get_positions(),
+        forces=a.get_forces(),
+        total_energy=a.calc.results["free_energy"], # VASP MLFF reads the potential E + electronic entropy.
+        # See https://w.vasp.at/forum/viewtopic.php?t=13705
+        stress_diagonal=_EV_Acub_TO_KBAR * np.array([xx, yy, zz]),
+        stress_off_diagonal=_EV_Acub_TO_KBAR * np.array([xy, yz, xz]),
+    )
+    return config
+
+
+def ml_ab_from_trajectory(
+    trajectory: list[Atoms],
+    basis_set: dict[str: [tuple[int, int],]]=None,
+    version: str=' 1.0 Version'
+) -> MLAB:
+    """
+    Transforms an ASE trajectory into a MLAB object.
+
+    Parameters
+    ----------
+    trajectory: list[Atoms]
+        List of ASE Atoms objects.
+    basis_set: dict
+        The basis set for the trained force field. It is formatted as a dictionary mapping
+        the elemental species to the basis set. The basis set is specified as a list of
+        [configuration_index, atom_index], that specifies which atomic environments are
+        included in the training set for each species. Note that the configuration and
+        atom index are 1-indexed as required by VASP. If not set, will default to [(1,1),]
+        for each element, and should be combined with `ML_ISTART=3`, as explained here:
+        https://www.vasp.at/forum/viewtopic.php?t=18400
+    version: str
+        The version of the ML_AB file format. Defaults to ' 1.0 Version'.
+
+    Returns
+    -------
+    MLAB
+        MLAB object
+    """
+    symbols = [list(OrderedDict.fromkeys(a.get_chemical_symbols())) for a in trajectory]
+    symbols_unique = list(OrderedDict.fromkeys(itertools.chain.from_iterable(symbols)))
+    atomic_mass = {
+        species: atomic_masses[atomic_numbers[species]] for species in symbols_unique
+    }
+    configs = [config_from_atoms(a) for a in trajectory]
+    reference_energy = {s: 0.0 for s in symbols_unique}
+    if not basis_set:
+        basis_set = {s: [[1, 1], ] for s in symbols_unique}
+    return  MLAB(
+        configurations=configs,
+        basis_set=basis_set,
+        atomic_mass=atomic_mass,
+        reference_energy=reference_energy,
+        version=version,
+    )
