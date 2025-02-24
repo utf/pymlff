@@ -187,7 +187,7 @@ def ml_ab_to_string(ml_ab):
     configuration_fmt = "\n".join(
         [
             _CONFIGURATION_FMT_STR.format(
-                i,
+                i + 1,
                 c.name,
                 c.num_atom_types,
                 c.num_atoms,
